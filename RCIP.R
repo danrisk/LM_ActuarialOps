@@ -62,20 +62,33 @@ rrc_ant <- Contabilidad_consolidada |>
 prima_devengada <- full_join(prima_bruta, rrc, by = "ramo")
 
 
-prima_devengada |> 
+prima_dev <- prima_devengada |> 
   mutate(ramo = str_to_upper(ramo),
          ramo = str_trim(ramo),
          ramo = iconv(ramo, to="ASCII//TRANSLIT"),
          ramo = case_when(
-           str_detect(ramo, "AUTO|VEHIC") ~ "ACCIDENTES PERSONALES COLECTIVO",
-           str_detect(ramo, "VIDA|SEPELIO") ~ "ACCIDENTES PERSONALES INDIVIDUAL",
-           str_detect(ramo, "INC|HOGAR")   ~ "AERONAVES",
-           TRUE                            ~ "OTROS"
-           
-           
-           
-         )
-         )
+           str_detect(ramo, "ACC. PERS. COLECTIVO") ~ "ACCIDENTES PERSONALES COLECTIVO",
+           str_detect(ramo, "ACC. PERS. INDIVIDUAL") ~ "ACCIDENTES PERSONALES INDIVIDUAL",
+           str_detect(ramo, "AUTO CASCO|AUTOMOVIL CASCO|AUTOMÓVIL CASCO") ~ "AUTOMOVIL CASCO",
+           str_detect(ramo, "COMBINADOS|COMBINADO") ~ "COMBINADOS",
+           str_detect(ramo, "DIVERSOS") ~ "DIVERSOS",
+           str_detect(ramo, "FIANZAS") ~ "FIANZAS",
+           str_detect(ramo, "HOSP. COLECTIVO") ~ "HOSPITALIZACION COLECTIVO",
+           str_detect(ramo, "HOSP. INDIVIDUAL") ~ "HOSPITALIZACION INDIVIDUAL",
+           str_detect(ramo, "RAMOS TECNIC|RAMOS TECNICOS")   ~ "RAMOS TECNICOS (TRI)",
+           str_detect(ramo, "RESP CIVIL AUTOMOVIL|RESPONSABILIDAD CIVIL AUTO")   ~ "RESPONS. CIVIL DE AUTOMOVIL",
+           str_detect(ramo, "RESP CIVIL GENERAL|RESP. CIVIL GENERAL")   ~ "RESPONS. CIVIL GENERAL",
+           str_detect(ramo, "RESP CIVIL PATRONAL|RESP. CIVIL PATRONAL")   ~ "RESPONS. CIVIL PATRONAL",
+           str_detect(ramo, "RESPONSABILIDAD CIVIL PATRONAL|RESP. CIVIL PATRONAL") ~ "RESPONS. CIVIL PROFESIONAL",
+           str_detect(ramo, "SEG. FUNERARIOS|SEG. FUNERARIOS COLECTIVO") ~ "SEGUROS FUNERARIOS",
+           str_detect(ramo, "SEGURO DE CREDITO") ~ "SEGUROS DE CREDITO",
+           TRUE ~ "OTROS")
+         ) |> 
+  group_by(ramo) |> 
+  summarise(`Prima Bruta` = sum(`Prima Bruta`),
+            `Reserva de Riesgo en Curso` = sum(`Reserva de Riesgo en Curso`)
+            )
+  
 
 ####### Egresos Técnicos#########
 
@@ -110,3 +123,7 @@ siniestros_pendientes_ant <- Contabilidad_consolidada |>
 ibnr_ant <- siniestros_pendientes_ant |> 
   mutate(`IBNR Anterior` = `Reserva de Siniestros Pendientes de Pago Anterior` * .03) |> 
   select(-`Reserva de Siniestros Pendientes de Pago Anterior`)
+
+
+
+write.xlsx(prima_bruta, "prima_profit.xlsx", overwrite = TRUE)
