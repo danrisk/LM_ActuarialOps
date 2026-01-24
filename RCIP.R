@@ -10,7 +10,7 @@ options(digits=7)
 contabilidad <- DBI::dbConnect(odbc::odbc(),
                                Driver   = "ODBC Driver 17 for SQL Server",
                                Server   = "192.168.8.14",
-                               Database = "CLAMUND",
+                               Database = "CMUNDIAL",
                                UID      = "danny2",
                                PWD      = "ReadyLove100*",
                                Port     = 1433)
@@ -21,8 +21,8 @@ cuentas <- tbl(contabilidad, "SCCUENTA") |>
   collect()
 
 saldos <- tbl(contabilidad, "SCREN_CO") |> 
-  filter(fec_emis >= as.Date("2024-01-01"),
-         fec_emis <= as.Date("2025-12-31")) |> 
+  filter(fec_emis >= as.Date("2026-01-01"),
+         fec_emis <= as.Date("2026-01-15")) |> 
   collect()
 
 
